@@ -33,7 +33,8 @@ import com.eetze.firstvuforiademo.utils.SampleUtils;
 /**
  * 渲染器类
  */
-public class SampleAppRenderer {
+public class SampleAppRenderer
+{
 
     private static final String LOGTAG = "SampleAppRenderer";
 
@@ -89,31 +90,42 @@ public class SampleAppRenderer {
         mActivity = activity;
         mRenderingInterface = renderingInterface;
 
-        // Vuforia Renderer为单例模式，返回单实例
+        // Vuforia Renderer为单例模式，返回渲染器
         mRenderer = Renderer.getInstance();
 
+        // 检查近平面与远平面参数合法性
         if(farPlane < nearPlane)
         {
             Log.i(LOGTAG, "Far plane should be greater than near plane");
             // 抛出非法参数异常
             throw new IllegalArgumentException();
         }
-
+        // 设置近平面与远平面
         setNearFarPlanes(nearPlane, farPlane);
 
-        if(deviceMode != Device.MODE.MODE_AR && deviceMode != Device.MODE.MODE_VR)
+        // 检查设备模式合法性
+        if(deviceMode != Device.MODE.MODE_AR
+                && deviceMode != Device.MODE.MODE_VR)
         {
-            Log.e(LOGTAG, "Device mode should be Device.MODE.MODE_AR or Device.MODE.MODE_VR");
+            Log.i(LOGTAG, "Device mode should be Device.MODE.MODE_AR or Device.MODE.MODE_VR");
+            // 抛出非法参数异常
             throw new IllegalArgumentException();
         }
 
+        // Vuforia Device 为单例模式，返回设备
         Device device = Device.getInstance();
-        device.setViewerActive(stereo); // Indicates if the app will be using a viewer, stereo mode and initializes the rendering primitives
-        device.setMode(deviceMode); // Select if we will be in AR or VR mode
+        // 设置设备当前浏览器是否为活动状态
+        device.setViewerActive(stereo);
+        // 设置She被为AR或VR模式
+        device.setMode(deviceMode);
     }
 
+    /**
+     * 当Surface被创建
+     */
     public void onSurfaceCreated()
     {
+        // 初始化渲染
         initRendering();
     }
 
@@ -128,6 +140,9 @@ public class SampleAppRenderer {
         mRenderingPrimitives = Device.getInstance().getRenderingPrimitives();
     }
 
+    /**
+     * 初始化渲染
+     */
     void initRendering()
     {
         vbShaderProgramID = SampleUtils.createProgramFromShaderSrc(VideoBackgroundShader.VB_VERTEX_SHADER,
@@ -230,6 +245,11 @@ public class SampleAppRenderer {
         mRenderer.end();
     }
 
+    /**
+     * 设置近平面与远平面
+     * @param near  近平面
+     * @param far   远平面
+     */
     public void setNearFarPlanes(float near, float far)
     {
         mNearPlane = near;
