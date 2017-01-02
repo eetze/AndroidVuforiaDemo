@@ -129,6 +129,10 @@ public class SampleAppRenderer
         initRendering();
     }
 
+    /**
+     * 当配置被改变
+     * @param isARActive
+     */
     public void onConfigurationChanged(boolean isARActive)
     {
         updateActivityOrientation();
@@ -145,7 +149,7 @@ public class SampleAppRenderer
      */
     void initRendering()
     {
-        // wait to add
+        // wait to add notes
         vbShaderProgramID
                 = SampleUtils.createProgramFromShaderSrc(
                 VideoBackgroundShader.VB_VERTEX_SHADER,
