@@ -30,47 +30,72 @@ import com.vuforia.ViewList;
 import com.eetze.firstvuforiademo.utils.VideoBackgroundShader;
 import com.eetze.firstvuforiademo.utils.SampleUtils;
 
+/**
+ * 渲染器类
+ */
 public class SampleAppRenderer {
 
     private static final String LOGTAG = "SampleAppRenderer";
 
+    // Vuforia 绘制图元对象
     private RenderingPrimitives mRenderingPrimitives = null;
+    // 渲染器控制器对象
     private SampleAppRendererControl mRenderingInterface = null;
+
     private Activity mActivity = null;
 
+    // Vuforia 渲染器对象
     private Renderer mRenderer = null;
-    private int currentView = VIEW.VIEW_SINGULAR;
-    private float mNearPlane = -1.0f;
-    private float mFarPlane = -1.0f;
 
+    private int currentView = VIEW.VIEW_SINGULAR;
+
+    // 近平面
+    private float mNearPlane = -1.0f;
+    // 远平面
+    private float mFarPlane = -1.0f;
+    // Vuforia GL纹理单元
     private GLTextureUnit videoBackgroundTex = null;
 
-    // Shader user to render the video background on AR mode
+    // AR模式渲染视频背景
     private int vbShaderProgramID = 0;
     private int vbTexSampler2DHandle = 0;
     private int vbVertexHandle = 0;
     private int vbTexCoordHandle = 0;
     private int vbProjectionMatrixHandle = 0;
 
-    // Display size of the device:
+    // 设备显示大小
     private int mScreenWidth = 0;
     private int mScreenHeight = 0;
 
-    // Stores orientation
+    // 是否竖屏
     private boolean mIsPortrait = false;
 
-    public SampleAppRenderer(SampleAppRendererControl renderingInterface, Activity activity, int deviceMode,
-                             boolean stereo, float nearPlane, float farPlane)
+    /**
+     * 构造器
+     * @param renderingInterface    渲染器控制器
+     * @param activity              Activity
+     * @param deviceMode            设备模式
+     * @param stereo                立体模式
+     * @param nearPlane             近平面
+     * @param farPlane              远平面
+     */
+    public SampleAppRenderer(SampleAppRendererControl renderingInterface,
+                             Activity activity,
+                             int deviceMode,
+                             boolean stereo,
+                             float nearPlane,
+                             float farPlane)
     {
         mActivity = activity;
-
         mRenderingInterface = renderingInterface;
-        // Renderer为单例模式，返回单实例
+
+        // Vuforia Renderer为单例模式，返回单实例
         mRenderer = Renderer.getInstance();
 
         if(farPlane < nearPlane)
         {
-            Log.e(LOGTAG, "Far plane should be greater than near plane");
+            Log.i(LOGTAG, "Far plane should be greater than near plane");
+            // 抛出非法参数异常
             throw new IllegalArgumentException();
         }
 
