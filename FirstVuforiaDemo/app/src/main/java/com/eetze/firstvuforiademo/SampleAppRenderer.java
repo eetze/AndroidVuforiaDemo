@@ -145,30 +145,59 @@ public class SampleAppRenderer
      */
     void initRendering()
     {
-        vbShaderProgramID = SampleUtils.createProgramFromShaderSrc(VideoBackgroundShader.VB_VERTEX_SHADER,
+        // wait to add
+        vbShaderProgramID
+                = SampleUtils.createProgramFromShaderSrc(
+                VideoBackgroundShader.VB_VERTEX_SHADER,
                 VideoBackgroundShader.VB_FRAGMENT_SHADER);
 
-        // Rendering configuration for video background
+        // 视频背景的渲染模式
         if (vbShaderProgramID > 0)
         {
-            // Activate shader:
+            // 根据ID选择需要激活的着色器程序
             GLES20.glUseProgram(vbShaderProgramID);
 
-            // Retrieve handler for texture sampler shader uniform variable:
-            vbTexSampler2DHandle = GLES20.glGetUniformLocation(vbShaderProgramID, "texSampler2D");
+            // 获取着色器程序中的着色器
+            vbTexSampler2DHandle
+                    = GLES20.glGetUniformLocation(
+                    vbShaderProgramID,
+                    "texSampler2D");
 
-            // Retrieve handler for projection matrix shader uniform variable:
-            vbProjectionMatrixHandle = GLES20.glGetUniformLocation(vbShaderProgramID, "projectionMatrix");
+            // 获取着色器程序中的投影矩阵句柄
+            vbProjectionMatrixHandle
+                    = GLES20.glGetUniformLocation(
+                    vbShaderProgramID,
+                    "projectionMatrix");
 
-            vbVertexHandle = GLES20.glGetAttribLocation(vbShaderProgramID, "vertexPosition");
-            vbTexCoordHandle = GLES20.glGetAttribLocation(vbShaderProgramID, "vertexTexCoord");
-            vbProjectionMatrixHandle = GLES20.glGetUniformLocation(vbShaderProgramID, "projectionMatrix");
-            vbTexSampler2DHandle = GLES20.glGetUniformLocation(vbShaderProgramID, "texSampler2D");
+            // 获取着色器程序中的顶点坐标数据
+            vbVertexHandle
+                    = GLES20.glGetAttribLocation(
+                    vbShaderProgramID,
+                    "vertexPosition");
 
-            // Stop using the program
+            // 获取着色器程序中的纹理坐标数据
+            vbTexCoordHandle
+                    = GLES20.glGetAttribLocation(
+                    vbShaderProgramID,
+                    "vertexTexCoord");
+
+            // 获取着色器程序中的投影矩阵句柄，出现两遍？
+            vbProjectionMatrixHandle
+                    = GLES20.glGetUniformLocation(
+                    vbShaderProgramID,
+                    "projectionMatrix");
+
+            // 获取着色器程序中的着色器，出现两遍？
+            vbTexSampler2DHandle
+                    = GLES20.glGetUniformLocation(
+                    vbShaderProgramID,
+                    "texSampler2D");
+
+            // 停止使用的着色器程序
             GLES20.glUseProgram(0);
         }
 
+        // 创建一个 Vuforia GL纹理单元
         videoBackgroundTex = new GLTextureUnit();
     }
 
