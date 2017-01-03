@@ -1,8 +1,13 @@
 package com.eetze.firstvuforiademo.utils;
 
+/**
+ * 视频背景着色器src代码
+ */
 public class VideoBackgroundShader
 {
-    
+    /**
+     * 顶点着色器程序src代码
+     */
     public static final String VB_VERTEX_SHADER =          
         "attribute vec4 vertexPosition;\n" +
         "attribute vec2 vertexTexCoord;\n" +
@@ -15,7 +20,10 @@ public class VideoBackgroundShader
         "    gl_Position = projectionMatrix * vertexPosition;\n" +
         "    texCoord = vertexTexCoord;\n" +
         "}\n";
-    
+
+    /**
+     * 片段着色器程序src代码
+     */
     public static final String VB_FRAGMENT_SHADER =
         "precision mediump float;\n" +
         "varying vec2 texCoord;\n" +
@@ -24,5 +32,4 @@ public class VideoBackgroundShader
         "{\n" +
         "    gl_FragColor = texture2D(texSampler2D, texCoord);\n" +
         "}\n";
-
 }
