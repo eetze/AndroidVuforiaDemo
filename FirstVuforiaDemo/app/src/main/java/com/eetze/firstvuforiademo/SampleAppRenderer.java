@@ -58,11 +58,11 @@ public class SampleAppRenderer
     private GLTextureUnit videoBackgroundTex = null;
 
     // AR模式渲染视频背景
-    private int vbShaderProgramID = 0;
-    private int vbTexSampler2DHandle = 0;
-    private int vbVertexHandle = 0;
-    private int vbTexCoordHandle = 0;
-    private int vbProjectionMatrixHandle = 0;
+    private int vbShaderProgramID = 0;      // 着色程序对象句柄
+    private int vbTexSampler2DHandle = 0;   // 使用哪一个采样器进行纹理采样变量句柄
+    private int vbVertexHandle = 0;         // 顶点位置变量句柄
+    private int vbTexCoordHandle = 0;       // 顶点纹理坐标变量句柄
+    private int vbProjectionMatrixHandle = 0;   // 投影矩阵变量句柄
 
     // 设备显示大小
     private int mScreenWidth = 0;
@@ -149,7 +149,7 @@ public class SampleAppRenderer
      */
     void initRendering()
     {
-        // wait to add notes
+        // 根据背景着色器src代码创建着色程序对象并获取其句柄
         vbShaderProgramID
                 = SampleUtils.createProgramFromShaderSrc(
                 VideoBackgroundShader.VB_VERTEX_SHADER,
@@ -158,44 +158,44 @@ public class SampleAppRenderer
         // 视频背景的渲染模式
         if (vbShaderProgramID > 0)
         {
-            // 根据ID选择需要激活的着色器程序
+            // OpenGL渲染管道切换到着色器模式，并激活指定着色器程序
             GLES20.glUseProgram(vbShaderProgramID);
 
-            // 获取着色器程序中的着色器
+            // 使用哪一个采样器进行纹理采样
             vbTexSampler2DHandle
                     = GLES20.glGetUniformLocation(
                     vbShaderProgramID,
                     "texSampler2D");
 
-            // 获取着色器程序中的投影矩阵句柄
+            // 投影矩阵
             vbProjectionMatrixHandle
                     = GLES20.glGetUniformLocation(
                     vbShaderProgramID,
                     "projectionMatrix");
 
-            // 获取着色器程序中的顶点坐标数据
+            // 顶点位置
             vbVertexHandle
                     = GLES20.glGetAttribLocation(
                     vbShaderProgramID,
                     "vertexPosition");
 
-            // 获取着色器程序中的纹理坐标数据
+            // 顶点纹理坐标
             vbTexCoordHandle
                     = GLES20.glGetAttribLocation(
                     vbShaderProgramID,
                     "vertexTexCoord");
 
-            // 获取着色器程序中的投影矩阵句柄，出现两遍？
-            vbProjectionMatrixHandle
-                    = GLES20.glGetUniformLocation(
-                    vbShaderProgramID,
-                    "projectionMatrix");
-
-            // 获取着色器程序中的着色器，出现两遍？
-            vbTexSampler2DHandle
-                    = GLES20.glGetUniformLocation(
-                    vbShaderProgramID,
-                    "texSampler2D");
+//            // 获取着色器程序中的投影矩阵句柄，出现两遍？
+//            vbProjectionMatrixHandle
+//                    = GLES20.glGetUniformLocation(
+//                    vbShaderProgramID,
+//                    "projectionMatrix");
+//
+//            // 获取着色器程序中的着色器，出现两遍？
+//            vbTexSampler2DHandle
+//                    = GLES20.glGetUniformLocation(
+//                    vbShaderProgramID,
+//                    "texSampler2D");
 
             // 停止使用的着色器程序
             GLES20.glUseProgram(0);
