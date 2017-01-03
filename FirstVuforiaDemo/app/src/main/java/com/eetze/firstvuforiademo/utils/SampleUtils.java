@@ -5,7 +5,6 @@ import android.util.Log;
 
 public class SampleUtils
 {
-    
     private static final String LOGTAG = "SampleUtils";
 
     /**
@@ -103,7 +102,6 @@ public class SampleUtils
         return program;
     }
 
-
     /**
      * 检查错误
      * @param op    错误相关字符串
@@ -119,13 +117,24 @@ public class SampleUtils
         }
     }
     
-    
-    // Transforms a screen pixel to a pixel onto the camera image,
-    // taking into account e.g. cropping of camera image to fit different aspect
-    // ratio screen.
-    // for the camera dimensions, the width is always bigger than the height
-    // (always landscape orientation)
-    // Top left of screen/camera is origin
+    /**
+     * 屏幕坐标到相机坐标，相机图像会进行剪裁以适应不同的横纵比屏幕
+     * 图形算法待深入研究
+     * @param screenX
+     * @param screenY
+     * @param screenDX
+     * @param screenDY
+     * @param screenWidth
+     * @param screenHeight
+     * @param cameraWidth
+     * @param cameraHeight
+     * @param cameraX
+     * @param cameraY
+     * @param cameraDX
+     * @param cameraDY
+     * @param displayRotation
+     * @param cameraRotation
+     */
     public static void screenCoordToCameraCoord(int screenX, int screenY,
         int screenDX, int screenDY, int screenWidth, int screenHeight,
         int cameraWidth, int cameraHeight, int[] cameraX, int[] cameraY,
@@ -137,15 +146,15 @@ public class SampleUtils
 
         // Compute the angle by which the camera image should be rotated clockwise so that it is
         // shown correctly on the display given its current orientation.
+        // 计算相机图像顺时针旋转的角度，使其在当前方向上显示正确。
         int correctedRotation = ((((displayRotation*90)-cameraRotation)+360)%360)/90;
 
-        switch (correctedRotation) {
-
+        switch (correctedRotation)
+        {
             case 0:
                 break;
 
             case 1:
-
                 int tmp = screenX;
                 screenX = screenHeight - screenY;
                 screenY = tmp;
@@ -166,7 +175,6 @@ public class SampleUtils
                 break;
 
             case 3:
-
                 tmp = screenX;
                 screenX = screenY;
                 screenY = screenWidth - tmp;
@@ -192,15 +200,16 @@ public class SampleUtils
         
         if (videoAspectRatio < screenAspectRatio)
         {
-            // the video height will fit in the screen height
+            // 视频高度将适合屏幕高度
             scaledUpVideoWidth = (float) screenHeight / videoAspectRatio;
             scaledUpVideoHeight = screenHeight;
             scaledUpX = (float) screenX
                 + ((scaledUpVideoWidth - (float) screenWidth) / 2.0f);
             scaledUpY = (float) screenY;
-        } else
+        }
+        else
         {
-            // the video width will fit in the screen width
+            // 视频宽度将适合屏幕宽度
             scaledUpVideoHeight = (float) screenWidth * videoAspectRatio;
             scaledUpVideoWidth = screenWidth;
             scaledUpY = (float) screenY
@@ -228,8 +237,18 @@ public class SampleUtils
             cameraDY[0] = (int) (((float) screenDY / (float) scaledUpVideoHeight) * videoHeight);
         }
     }
-    
-    
+
+    /**
+     * 获取正交矩阵，投影矩阵
+     * 图形算法待深入研究
+     * @param nLeft
+     * @param nRight
+     * @param nBottom
+     * @param nTop
+     * @param nNear
+     * @param nFar
+     * @return
+     */
     public static float[] getOrthoMatrix(float nLeft, float nRight,
         float nBottom, float nTop, float nNear, float nFar)
     {
@@ -249,5 +268,4 @@ public class SampleUtils
         
         return nProjMatrix;
     }
-    
 }
