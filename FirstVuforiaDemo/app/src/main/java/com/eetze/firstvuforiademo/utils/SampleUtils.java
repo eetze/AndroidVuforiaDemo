@@ -9,71 +9,92 @@ public class SampleUtils
     private static final String LOGTAG = "SampleUtils";
 
     /**
-     * 初始化着色程序
-     * @param shaderType    着色程序类别
+     * 初始化着色程序，着色器初始化主要分为5个步骤进行，详见代码
+     * @param shaderType    着色程序类别 GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
      * @param source        着色程序代码src
-     * @return
+     * @return  着色器句柄
      */
     static int initShader(int shaderType, String source)
     {
-        // 创建一个新的着色程序
+        // [1] 创建一个新的着色程序，获取着色器句柄
         int shader = GLES20.glCreateShader(shaderType);
+
+        // 非0表示着色器创建成功
         if (shader != 0)
         {
+            // [2] 提供着色器源码
             GLES20.glShaderSource(shader, source);
+            // [3] 变异着色器程序
             GLES20.glCompileShader(shader);
-            
+
+            // 保存便以结果的数组
             int[] glStatusVar = { GLES20.GL_FALSE };
-            GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, glStatusVar,
-                0);
+
+            // [4] 查询编译结果
+            GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS,
+                    glStatusVar, 0);
+
+            // 编译失败
             if (glStatusVar[0] == GLES20.GL_FALSE)
             {
-                Log.e(LOGTAG, "Could NOT compile shader " + shaderType + " : "
+                // [5] 打印Info日志
+                Log.i(LOGTAG, "Could NOT compile shader " + shaderType + " : "
                     + GLES20.glGetShaderInfoLog(shader));
+                // [6] 删除着色器
                 GLES20.glDeleteShader(shader);
                 shader = 0;
             }
-            
         }
-        
+
+        // 返回着色器句柄
         return shader;
     }
 
     /**
-     * 创建着色器程序
+     * 创建着色器程序对象
      * @param vertexShaderSrc       顶点着色器程序src
-     * @param fragmentShaderSrc     碎片着色器程序src
-     * @return
+     * @param fragmentShaderSrc     片段着色器程序src
+     * @return  0 失败; !0 成功
      */
     public static int createProgramFromShaderSrc(String vertexShaderSrc,
         String fragmentShaderSrc)
     {
+        // 创建顶点着色器
         int vertShader = initShader(GLES20.GL_VERTEX_SHADER, vertexShaderSrc);
-        int fragShader = initShader(GLES20.GL_FRAGMENT_SHADER,
-            fragmentShaderSrc);
-        
+        // 创建片段着色器
+        int fragShader = initShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderSrc);
+
+        // 着色器创建失败返回0，是否需要释放创建成功的着色器？
         if (vertShader == 0 || fragShader == 0)
             return 0;
-        
+
+        // 创建一个着色程序对象
         int program = GLES20.glCreateProgram();
+
         if (program != 0)
         {
+            // 将顶点着色器附加到着色程序对象上
             GLES20.glAttachShader(program, vertShader);
             checkGLError("glAttchShader(vert)");
-            
+
+            // 将片段着色器附加到着色程序对象上
             GLES20.glAttachShader(program, fragShader);
             checkGLError("glAttchShader(frag)");
-            
+
+            // 对着色程序对象进行链接操作，即生成最终的着色程序
             GLES20.glLinkProgram(program);
+
             int[] glStatusVar = { GLES20.GL_FALSE };
-            GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, glStatusVar,
-                0);
+            // 查询链接是否成功
+            GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS,
+                    glStatusVar, 0);
+
+            // 如果链接失败
             if (glStatusVar[0] == GLES20.GL_FALSE)
             {
-                Log.e(
-                    LOGTAG,
-                    "Could NOT link program : "
+                Log.i(LOGTAG, "Could NOT link program : "
                         + GLES20.glGetProgramInfoLog(program));
+                // 删除着色程序对象
                 GLES20.glDeleteProgram(program);
                 program = 0;
             }
@@ -81,16 +102,21 @@ public class SampleUtils
         
         return program;
     }
-    
-    
+
+
+    /**
+     * 检查错误
+     * @param op    错误相关字符串
+     */
     public static void checkGLError(String op)
     {
-        for (int error = GLES20.glGetError(); error != 0; error = GLES20
-            .glGetError())
-            Log.e(
-                LOGTAG,
-                "After operation " + op + " got glError 0x"
+        for (int error = GLES20.glGetError();
+             error != 0;
+             error = GLES20.glGetError())
+        {
+            Log.i(LOGTAG, "After operation " + op + " got glError 0x"
                     + Integer.toHexString(error));
+        }
     }
     
     
