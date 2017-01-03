@@ -1,26 +1,22 @@
-/*===============================================================================
-Copyright (c) 2016 PTC Inc. All Rights Reserved.
-
-Copyright (c) 2012-2014 Qualcomm Connected Experiences, Inc. All Rights Reserved.
-
-Vuforia is a trademark of PTC Inc., registered in the United States and other 
-countries.
-===============================================================================*/
-
 package com.eetze.firstvuforiademo.utils;
 
 import android.opengl.GLES20;
 import android.util.Log;
 
-
 public class SampleUtils
 {
     
     private static final String LOGTAG = "SampleUtils";
-    
-    
+
+    /**
+     * 初始化着色程序
+     * @param shaderType    着色程序类别
+     * @param source        着色程序代码src
+     * @return
+     */
     static int initShader(int shaderType, String source)
     {
+        // 创建一个新的着色程序
         int shader = GLES20.glCreateShader(shaderType);
         if (shader != 0)
         {
@@ -42,8 +38,13 @@ public class SampleUtils
         
         return shader;
     }
-    
-    
+
+    /**
+     * 创建着色器程序
+     * @param vertexShaderSrc       顶点着色器程序src
+     * @param fragmentShaderSrc     碎片着色器程序src
+     * @return
+     */
     public static int createProgramFromShaderSrc(String vertexShaderSrc,
         String fragmentShaderSrc)
     {
