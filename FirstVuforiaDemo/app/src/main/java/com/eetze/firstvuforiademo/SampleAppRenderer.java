@@ -209,15 +209,22 @@ public class SampleAppRenderer
         videoBackgroundTex = new GLTextureUnit();
     }
 
-    // Main rendering method
-    // The method setup state for rendering, setup 3D transformations required for AR augmentation
-    // and call any specific rendering method
+    /**
+     * 主要的绘制方法
+     * 该方法为渲染设置状态，设置AR增强所需的3D转换，并调用特定的渲染方法
+     */
     public void render()
     {
+        // 清空渲染缓冲区（颜色缓冲区、深度缓冲区）
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+        // Vuforia 状态对象
         State state;
-        // Get our current state
+
+        // 获取当前状态
         state = TrackerManager.getInstance().getStateUpdater().updateState();
+
+        // 开始渲染，标记渲染状态，并返回最新可用状态对象
         mRenderer.begin(state);
 
         // We must detect if background reflection is active and adjust the
@@ -226,59 +233,74 @@ public class SampleAppRenderer
         // reflected as well,
         // therefore standard counter clockwise face culling will result in
         // "inside out" models.
-        if (Renderer.getInstance().getVideoBackgroundConfig().getReflection() == VIDEO_BACKGROUND_REFLECTION.VIDEO_BACKGROUND_REFLECTION_ON)
-            GLES20.glFrontFace(GLES20.GL_CW);  // Front camera
+        if (Renderer.getInstance().getVideoBackgroundConfig().getReflection()
+                == VIDEO_BACKGROUND_REFLECTION.VIDEO_BACKGROUND_REFLECTION_ON)
+        {
+            GLES20.glFrontFace(GLES20.GL_CW);   // 前置摄像头
+        }
         else
-            GLES20.glFrontFace(GLES20.GL_CCW);   // Back camera
+        {
+            GLES20.glFrontFace(GLES20.GL_CCW);  // 后置摄像头
+        }
 
-        // We get a list of views which depend on the mode we are working on, for mono we have
-        // only one view, in stereo we have three: left, right and postprocess
+        // 返回可用于从这些图元绘制的视图集
         ViewList viewList = mRenderingPrimitives.getRenderingViews();
 
-        // Cycle through the view list
+        // 通过循环查看视图列表
         for (int v = 0; v < viewList.getNumViews(); v++)
         {
-            // Get the view id
+            // 获取视图ID
             int viewID = viewList.getView(v);
 
             Vec4I viewport;
-            // Get the viewport for that specific view
+
+            // 获取图的视口
             viewport = mRenderingPrimitives.getViewport(viewID);
 
-            // Set viewport for current view
-            GLES20.glViewport(viewport.getData()[0], viewport.getData()[1], viewport.getData()[2], viewport.getData()[3]);
+            // 设置视口到当前视图
+            // 即设置将要绘制的2D物体的窗口的x、y、w、h
+            GLES20.glViewport(viewport.getData()[0], viewport.getData()[1],
+                    viewport.getData()[2], viewport.getData()[3]);
 
-            // Set scissor
-            GLES20.glScissor(viewport.getData()[0], viewport.getData()[1], viewport.getData()[2], viewport.getData()[3]);
+            // 设置剪切区域
+            GLES20.glScissor(viewport.getData()[0], viewport.getData()[1],
+                    viewport.getData()[2], viewport.getData()[3]);
 
-            // Get projection matrix for the current view. COORDINATE_SYSTEM_CAMERA used for AR and
-            // COORDINATE_SYSTEM_WORLD for VR
-            Matrix34F projMatrix = mRenderingPrimitives.getProjectionMatrix(viewID, COORDINATE_SYSTEM_TYPE.COORDINATE_SYSTEM_CAMERA);
+            // 获取当前视图的投影矩阵
+            // COORDINATE_SYSTEM_CAMERA  AR
+            // COORDINATE_SYSTEM_WORLD   VR
+            Matrix34F projMatrix = mRenderingPrimitives.getProjectionMatrix(viewID,
+                    COORDINATE_SYSTEM_TYPE.COORDINATE_SYSTEM_CAMERA);
 
-            // Create GL matrix setting up the near and far planes
+            // 创建GL矩阵，并设置近平面与远平面
+            // convertPerspectiveProjection2GLMatrix() 将投影矩阵转换成GL矩阵
             float rawProjectionMatrixGL[] = Tool.convertPerspectiveProjection2GLMatrix(
                     projMatrix,
                     mNearPlane,
                     mFarPlane)
                     .getData();
 
-            // Apply the appropriate eye adjustment to the raw projection matrix, and assign to the global variable
+            // 视口矩阵
             float eyeAdjustmentGL[] = Tool.convert2GLMatrix(mRenderingPrimitives
                     .getEyeDisplayAdjustmentMatrix(viewID)).getData();
 
+            // 投影矩阵
             float projectionMatrix[] = new float[16];
-            // Apply the adjustment to the projection matrix
-            Matrix.multiplyMM(projectionMatrix, 0, rawProjectionMatrixGL, 0, eyeAdjustmentGL, 0);
 
+            // 将调整应用于投影矩阵，合并矩阵
+            Matrix.multiplyMM(projectionMatrix, 0,
+                    rawProjectionMatrixGL, 0,
+                    eyeAdjustmentGL, 0);
+
+            // 当前视图ID
             currentView = viewID;
 
-            // Call renderFrame from the app renderer class which implements SampleAppRendererControl
-            // This will be called for MONO, LEFT and RIGHT views, POSTPROCESS will not render the
-            // frame
+            // 跳转到 SampleAppRendererControl接口的实现中执行，进行帧渲染
             if(currentView != VIEW.VIEW_POSTPROCESS)
                 mRenderingInterface.renderFrame(state, projectionMatrix);
         }
 
+        // 结束渲染，取消渲染状态标记
         mRenderer.end();
     }
 
