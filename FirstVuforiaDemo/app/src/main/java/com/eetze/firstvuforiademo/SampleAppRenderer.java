@@ -320,20 +320,25 @@ public class SampleAppRenderer
      */
     public void renderVideoBackground()
     {
+        // 如果当前视图是待后处理的视图则return
         if(currentView == VIEW.VIEW_POSTPROCESS)
             return;
 
         int vbVideoTextureUnit = 0;
-        // Bind the video bg texture and get the Texture ID from Vuforia
+
+        // 绑定背景视频的纹理，并通过Vuforia获取纹理ID
         videoBackgroundTex.setTextureUnit(vbVideoTextureUnit);
+        // 更新视频背景纹理
         if (!mRenderer.updateVideoBackgroundTexture(videoBackgroundTex))
         {
-            Log.e(LOGTAG, "Unable to update video background texture");
+            Log.i(LOGTAG, "Unable to update video background texture");
             return;
         }
 
+        // 获取当前视图的投影矩阵
         float[] vbProjectionMatrix = Tool.convert2GLMatrix(
-                mRenderingPrimitives.getVideoBackgroundProjectionMatrix(currentView, COORDINATE_SYSTEM_TYPE.COORDINATE_SYSTEM_CAMERA)).getData();
+                mRenderingPrimitives.getVideoBackgroundProjectionMatrix(currentView,
+                        COORDINATE_SYSTEM_TYPE.COORDINATE_SYSTEM_CAMERA)).getData();
 
         // Apply the scene scale on video see-through eyewear, to scale the video background and augmentation
         // so that the display lines up with the real world
@@ -349,20 +354,23 @@ public class SampleAppRenderer
         GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
 
         Mesh vbMesh = mRenderingPrimitives.getVideoBackgroundMesh(currentView);
-        // Load the shader and upload the vertex/texcoord/index data
+
+        // 加载着色器和上传的顶点/纹理坐标/索引数据
         GLES20.glUseProgram(vbShaderProgramID);
-        GLES20.glVertexAttribPointer(vbVertexHandle, 3, GLES20.GL_FLOAT, false, 0, vbMesh.getPositions().asFloatBuffer());
-        GLES20.glVertexAttribPointer(vbTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, vbMesh.getUVs().asFloatBuffer());
+        GLES20.glVertexAttribPointer(vbVertexHandle, 3, GLES20.GL_FLOAT,
+                false, 0, vbMesh.getPositions().asFloatBuffer());
+        GLES20.glVertexAttribPointer(vbTexCoordHandle, 2, GLES20.GL_FLOAT,
+                false, 0, vbMesh.getUVs().asFloatBuffer());
 
         GLES20.glUniform1i(vbTexSampler2DHandle, vbVideoTextureUnit);
 
-        // Render the video background with the custom shader
-        // First, we enable the vertex arrays
+        // 首先渲染自定义着色器的视频背景，启用顶点数组
         GLES20.glEnableVertexAttribArray(vbVertexHandle);
         GLES20.glEnableVertexAttribArray(vbTexCoordHandle);
 
-        // Pass the projection matrix to OpenGL
-        GLES20.glUniformMatrix4fv(vbProjectionMatrixHandle, 1, false, vbProjectionMatrix, 0);
+        // 将投影矩阵传递给OpenGL
+        GLES20.glUniformMatrix4fv(vbProjectionMatrixHandle, 1, false,
+                vbProjectionMatrix, 0);
 
         // 开始进行渲染
         // param 1: 类型
@@ -374,7 +382,7 @@ public class SampleAppRenderer
                 GLES20.GL_UNSIGNED_SHORT,
                 vbMesh.getTriangles().asShortBuffer());
 
-        // Finally, we disable the vertex arrays
+        // 最后，禁用顶点数组
         GLES20.glDisableVertexAttribArray(vbVertexHandle);
         GLES20.glDisableVertexAttribArray(vbTexCoordHandle);
 
