@@ -131,16 +131,20 @@ public class SampleAppRenderer
 
     /**
      * 当配置被改变
-     * @param isARActive
+     * @param isARActive    是否为AR模式
      */
     public void onConfigurationChanged(boolean isARActive)
     {
+        // 更新方向(纵向横向)信息
         updateActivityOrientation();
+        // 获取屏幕尺寸
         storeScreenDimensions();
 
+        // 如果是AR模式则对渲染器背景进行设置
         if(isARActive)
             configureVideoBackground();
 
+        // 获取绘制图元对象
         mRenderingPrimitives = Device.getInstance().getRenderingPrimitives();
     }
 
@@ -383,83 +387,101 @@ public class SampleAppRenderer
         return Math.tan(cameraFovYRads / 2) / Math.tan(virtualFovYRads / 2);
     }
 
-    // Configures the video mode and sets offsets for the camera's image
+    /**
+     * 设置渲染器的背景大小，配置视频模式和设置相机的图像偏移
+     */
     public void configureVideoBackground()
     {
+        // Vuforia 手机摄像头对象
         CameraDevice cameraDevice = CameraDevice.getInstance();
+
+        // Vuforia 获取默认视频模式对象
         VideoMode vm = cameraDevice.getVideoMode(CameraDevice.MODE.MODE_DEFAULT);
 
+        // Vuforia 视频背景配置选项
         VideoBackgroundConfig config = new VideoBackgroundConfig();
+
+        // 启用视频背景渲染
         config.setEnabled(true);
+
+        // 设置视频显示时的相对位置
         config.setPosition(new Vec2I(0, 0));
 
         int xSize = 0, ySize = 0;
-        // We keep the aspect ratio to keep the video correctly rendered. If it is portrait we
-        // preserve the height and scale width and vice versa if it is landscape, we preserve
-        // the width and we check if the selected values fill the screen, otherwise we invert
-        // the selection
-        if (mIsPortrait)
+
+        // 通过保持横纵比来保持视频的正常渲染。
+        // 如果为纵向，则保持Activity的高度不变，然后计算获得宽度
+        // 反之为横屏，则保持Activity的宽度不变
+        if (mIsPortrait)    // 纵向
         {
-            xSize = (int) (vm.getHeight() * (mScreenHeight / (float) vm
-                    .getWidth()));
+            // 保持高度不变，通过视频模式对象中的宽高比求得宽度
+            xSize = (int) (vm.getHeight() * (mScreenHeight / (float) vm.getWidth()));
+            // 高度保持不变
             ySize = mScreenHeight;
 
+            // 如果计算得到的宽度小于实际Activity的宽度
             if (xSize < mScreenWidth)
             {
+                // 此时以宽度为准保持不变，求高度
                 xSize = mScreenWidth;
-                ySize = (int) (mScreenWidth * (vm.getWidth() / (float) vm
-                        .getHeight()));
+                ySize = (int) (mScreenWidth * (vm.getWidth() / (float) vm.getHeight()));
             }
-        } else
+        }
+        else    // 横向
         {
+            // 同上亦相反
             xSize = mScreenWidth;
-            ySize = (int) (vm.getHeight() * (mScreenWidth / (float) vm
-                    .getWidth()));
+            ySize = (int) (vm.getHeight() * (mScreenWidth / (float) vm.getWidth()));
 
             if (ySize < mScreenHeight)
             {
-                xSize = (int) (mScreenHeight * (vm.getWidth() / (float) vm
-                        .getHeight()));
+                xSize = (int) (mScreenHeight * (vm.getWidth() / (float) vm.getHeight()));
                 ySize = mScreenHeight;
             }
         }
 
+        // 将计算得到的X、Y设置到视频背景设置对象中
         config.setSize(new Vec2I(xSize, ySize));
 
         Log.i(LOGTAG, "Configure Video Background : Video (" + vm.getWidth()
                 + " , " + vm.getHeight() + "), Screen (" + mScreenWidth + " , "
                 + mScreenHeight + "), mSize (" + xSize + " , " + ySize + ")");
 
+        // 对渲染器背景进行设置
         Renderer.getInstance().setVideoBackgroundConfig(config);
-
     }
 
-
-    // Stores screen dimensions
+    /**
+     * 获取屏幕尺寸
+     * 保存在mScreenWidth、mScreenHeight种
+     */
     private void storeScreenDimensions()
     {
-        // Query display dimensions:
+        // 获取Activity显示尺寸
         Point size = new Point();
         mActivity.getWindowManager().getDefaultDisplay().getRealSize(size);
         mScreenWidth = size.x;
         mScreenHeight = size.y;
     }
 
-
-    // Stores the orientation depending on the current resources configuration
+    /**
+     * 根据资源判断Activity方向（纵向or横向）
+     * 主要表现为修改mIsPortrait取值，true 纵向；false 横向。
+     */
     private void updateActivityOrientation()
     {
+        // 获取布局对象
         Configuration config = mActivity.getResources().getConfiguration();
-
+        // 判断方向
         switch (config.orientation)
         {
-            case Configuration.ORIENTATION_PORTRAIT:
+            case Configuration.ORIENTATION_PORTRAIT:    // 纵向
                 mIsPortrait = true;
                 break;
-            case Configuration.ORIENTATION_LANDSCAPE:
+            case Configuration.ORIENTATION_LANDSCAPE:   // 横向
                 mIsPortrait = false;
                 break;
-            case Configuration.ORIENTATION_UNDEFINED:
+            case Configuration.ORIENTATION_UNDEFINED:   // 未声明
             default:
                 break;
         }
