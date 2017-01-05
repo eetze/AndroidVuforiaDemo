@@ -344,7 +344,10 @@ public class SampleAppRenderer
         // so that the display lines up with the real world
         // This should not be applied on optical see-through devices, as there is no video background,
         // and the calibration ensures that the augmentation matches the real world
-        if (Device.getInstance().isViewerActive()) {
+        // 如果查看器处于活动状态，则返回true，否则为false。
+        if (Device.getInstance().isViewerActive())
+        {
+            // 获取缩放因子
             float sceneScaleFactor = (float)getSceneScaleFactor();
             Matrix.scaleM(vbProjectionMatrix, 0, sceneScaleFactor, sceneScaleFactor, 1.0f);
         }
@@ -393,27 +396,34 @@ public class SampleAppRenderer
     static final float VIRTUAL_FOV_Y_DEGS = 85.0f;
     static final float M_PI = 3.14159f;
 
+    /**
+     * 获取场景缩放因子
+     * @return
+     */
     double getSceneScaleFactor()
     {
-        // Get the y-dimension of the physical camera field of view
-        Vec2F fovVector = CameraDevice.getInstance().getCameraCalibration().getFieldOfViewRads();
+        // 获取物理摄像机视野的y维度
+        Vec2F fovVector = CameraDevice.getInstance()
+                .getCameraCalibration().getFieldOfViewRads();
         float cameraFovYRads = fovVector.getData()[1];
 
-        // Get the y-dimension of the virtual camera field of view
+        // 获取虚拟摄像机视野的y维度
         float virtualFovYRads = VIRTUAL_FOV_Y_DEGS * M_PI / 180;
 
         // The scene-scale factor represents the proportion of the viewport that is filled by
         // the video background when projected onto the same plane.
         // In order to calculate this, let 'd' be the distance between the cameras and the plane.
         // The height of the projected image 'h' on this plane can then be calculated:
+        // d为镜头到面的距离，面高为h，则1/2视角（fov/2）的正切为  1/2 * h / d，即h/2d
         //   tan(fov/2) = h/2d
-        // which rearranges to:
+        // 转换得到：
         //   2d = h/tan(fov/2)
         // Since 'd' is the same for both cameras, we can combine the equations for the two cameras:
+        // 物理摄像头与虚拟摄像头需要成像的面到摄像头的距离都为d，可以得到如下公式
         //   hPhysical/tan(fovPhysical/2) = hVirtual/tan(fovVirtual/2)
-        // Which rearranges to:
+        // 转换得到:
         //   hPhysical/hVirtual = tan(fovPhysical/2)/tan(fovVirtual/2)
-        // ... which is the scene-scale factor
+        // 物理成像面 / 虚拟成像面 就是所需的缩放因子，所以return如下表达式
         return Math.tan(cameraFovYRads / 2) / Math.tan(virtualFovYRads / 2);
     }
 
