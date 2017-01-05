@@ -349,29 +349,53 @@ public class SampleAppRenderer
         {
             // 获取缩放因子
             float sceneScaleFactor = (float)getSceneScaleFactor();
-            Matrix.scaleM(vbProjectionMatrix, 0, sceneScaleFactor, sceneScaleFactor, 1.0f);
+            // 根据缩放因子对投影矩阵的X、Y轴进行缩放
+            Matrix.scaleM(vbProjectionMatrix, 0, sceneScaleFactor,
+                    sceneScaleFactor, 1.0f);
         }
 
+        // 关闭更新深度缓冲区功能
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+        // 关闭剔除操作效果
         GLES20.glDisable(GLES20.GL_CULL_FACE);
+        // 关闭剪裁测试功能
         GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
 
+        // 返回一个简单的网格，适合渲染视频背景纹理。
         Mesh vbMesh = mRenderingPrimitives.getVideoBackgroundMesh(currentView);
 
-        // 加载着色器和上传的顶点/纹理坐标/索引数据
+        // 使用选定的着色程序
         GLES20.glUseProgram(vbShaderProgramID);
+
+        // 指定了渲染时索引为vbVertexHandle(顶点)的属性数组的数据格式和位置
+        /* ===============================================================
+         * index  指定要修改的顶点属性的索引值
+         * size   指定每个顶点属性的组件数量。必须为1、2、3或者4。初始值为4。
+         *       （如position是由3个（x,y,z）组成，而颜色是4个（r,g,b,a））
+         * type   指定数组中每个组件的数据类型。可用的符号常量有GL_BYTE, GL_UNSIGNED_BYTE,
+         *        GL_SHORT,GL_UNSIGNED_SHORT, GL_FIXED, 和 GL_FLOAT，初始值为GL_FLOAT。
+         * normalized  指定当被访问时，固定点数据值是否应该被归一化（GL_TRUE）或者直接转换
+         *             为固定点值（GL_FALSE）。
+         * stride  指定连续顶点属性之间的偏移量。如果为0，那么顶点属性会被理解为：
+         *         它们是紧密排列在一起的。初始值为0。
+         * pointer 指定第一个组件在数组的第一个顶点属性中的偏移量。
+         *         该数组与GL_ARRAY_BUFFER绑定，储存于缓冲区中。初始值为0；
+         * =============================================================== */
         GLES20.glVertexAttribPointer(vbVertexHandle, 3, GLES20.GL_FLOAT,
                 false, 0, vbMesh.getPositions().asFloatBuffer());
+
+        // 指定了渲染时索引值为vbTexCoordHandle(纹理)的属性数组的数据格式和位置
         GLES20.glVertexAttribPointer(vbTexCoordHandle, 2, GLES20.GL_FLOAT,
                 false, 0, vbMesh.getUVs().asFloatBuffer());
 
+        // 根据之前设置的采样器进行纹理采样变量句柄 进行常亮装在
         GLES20.glUniform1i(vbTexSampler2DHandle, vbVideoTextureUnit);
 
-        // 首先渲染自定义着色器的视频背景，启用顶点数组
+        // 使用前面指定的两个数组数据
         GLES20.glEnableVertexAttribArray(vbVertexHandle);
         GLES20.glEnableVertexAttribArray(vbTexCoordHandle);
 
-        // 将投影矩阵传递给OpenGL
+        // 根据之前设置的投影矩阵变量句柄 进行投影矩阵设置
         GLES20.glUniformMatrix4fv(vbProjectionMatrixHandle, 1, false,
                 vbProjectionMatrix, 0);
 
@@ -385,15 +409,17 @@ public class SampleAppRenderer
                 GLES20.GL_UNSIGNED_SHORT,
                 vbMesh.getTriangles().asShortBuffer());
 
-        // 最后，禁用顶点数组
+        // 最后，禁用前面指定的两个数组数据
         GLES20.glDisableVertexAttribArray(vbVertexHandle);
         GLES20.glDisableVertexAttribArray(vbTexCoordHandle);
 
+        // 检查OpenGL ES 2.0 是否有错，出现错误信息则打印相应log信息
         SampleUtils.checkGLError("Rendering of the video background failed");
     }
 
-
+    // 虚拟摄像头Y轴视角度数
     static final float VIRTUAL_FOV_Y_DEGS = 85.0f;
+    // π值
     static final float M_PI = 3.14159f;
 
     /**

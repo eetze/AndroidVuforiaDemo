@@ -103,7 +103,7 @@ public class SampleUtils
     }
 
     /**
-     * 检查错误
+     * 检查错误，错误来源为OpenGL ES 2.0
      * @param op    错误相关字符串
      */
     public static void checkGLError(String op)
